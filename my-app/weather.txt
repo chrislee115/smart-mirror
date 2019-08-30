@@ -1,0 +1,12 @@
+Condition: Clear Sky
+Temp: 72°F
+Hi/Lo
+75°/68°
+Humidity
+49%
+Wind Speed
+11mph
+Rain
+0mm
+Snow
+0mm

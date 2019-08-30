@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd /home/pi/Desktop/my-app/
+sudo java -jar /home/pi/Desktop/my-app/target/my-app-1.0-SNAPSHOT-jar-with-dependencies.jar
