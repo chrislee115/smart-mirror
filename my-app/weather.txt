@@ -1,11 +1,11 @@
-Condition: Clear Sky
-Temp: 72°F
+Condition: Broken Clouds
+Temp: 78°F
 Hi/Lo
-75°/68°
+81°/75°
 Humidity
-49%
+51%
 Wind Speed
-11mph
+8mph
 Rain
 0mm
 Snow

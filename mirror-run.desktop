@@ -1,0 +1,7 @@
+#!/usr/bin/env
+[Desktop Entry]
+Name=mirror-run
+Comment=updates calendar text file
+Exec=/home/pi/Desktop/Mirror_Pi/application.linux64/Mirror_Pi
+Terminal=false
+Type=Application

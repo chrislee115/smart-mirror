@@ -65,7 +65,6 @@ float eventX = 30;
 float defEventY = 250;
 float eventY;
 boolean isLYear = (year() % 4 == 0);
-boolean hasEvents;
 int eventPage = 0;
 int updateCal = 0;
 int updateSpot = 0;
@@ -75,23 +74,23 @@ static public void main(String args[]) {
   PApplet.main("Mirror_Pi");
 }
 void setup(){
-  //fullScreen();
-  size(1920, 1080);
+  fullScreen();
+  //size(1920, 1080);
   lightFont = createFont("Open Sans Light", 72);
   regFont = createFont("Open Sans Regular", 72);
   boldFont = createFont("Open Sans SemiBold", 72);
   textFont(lightFont, regSize);
   launch("/home/pi/Desktop/widget-start.desktop");
   
-  clear = loadImage("/home/pi/Desktop/Mirror_Pi/Sunny.jpg");
-  cloudy = loadImage("/home/pi/Desktop/Mirror_Pi/Cloudy.jpg");
-  hail = loadImage("/home/pi/Desktop/Mirror_Pi/Hail.jpg");
-  mist = loadImage("/home/pi/Desktop/Mirror_Pi/Mist.jpg");
-  rain = loadImage("/home/pi/Desktop/Mirror_Pi/Rain.jpg"); 
-  snow = loadImage("/home/pi/Desktop/Mirror_Pi/Snow.jpg");
-  sunny = loadImage("/home/pi/Desktop/Mirror_Pi/Sunny.jpg");
-  thunderstorm = loadImage("/home/pi/Desktop/Mirror_Pi/Thunderstorm.jpg");
-  windy = loadImage("/home/pi/Desktop/Mirror_Pi/Windy.jpg");
+  clear = loadImage("/home/pi/Desktop/Mirror_Pi/Sunny.png");
+  cloudy = loadImage("/home/pi/Desktop/Mirror_Pi/Cloudy.png");
+  hail = loadImage("/home/pi/Desktop/Mirror_Pi/Hail.png");
+  mist = loadImage("/home/pi/Desktop/Mirror_Pi/Mist.png");
+  rain = loadImage("/home/pi/Desktop/Mirror_Pi/Rain.png"); 
+  snow = loadImage("/home/pi/Desktop/Mirror_Pi/Snow.png");
+  sunny = loadImage("/home/pi/Desktop/Mirror_Pi/Sunny.png");
+  thunderstorm = loadImage("/home/pi/Desktop/Mirror_Pi/Thunderstorm.png");
+  windy = loadImage("/home/pi/Desktop/Mirror_Pi/Windy.png");
   
   bg = loadImage("/home/pi/Desktop/northern-lights.jpeg");
 }
@@ -165,13 +164,14 @@ void mousePressed() {
 void nowPlaying() {
   songData = loadStrings("/home/pi/Desktop/my-app/now-playing.txt");
   //0 is name, 1 is artist, 2 is album
+  textAlign(CENTER);
   if (songData.length > 0) {
-    if (songData[0] == "Nothing is playing.") { 
-      return;
-    }
-    text(songData[0], 500, 500);
-    text(songData[1], 600, 600);
-    text(songData[2], 700, 700);
+    textSize(smSize + 5);
+    text("Now Playing", width / 2, height - 130);
+    textSize(smSize);
+    text(songData[0], width / 2, height - 100);
+    text(songData[1], width / 2, height - 70);
+    text(songData[2], width / 2, height - 40);
   }
 }
 String getDOW(int y, int m, int d) {
@@ -191,8 +191,9 @@ int standardizeHour(int hour_in){
   }
   return hour_in;
 }
-int defWeatherY = 620;
+int defWeatherY = 550;
 void weather(){
+  textAlign(RIGHT);
   PImage imageTypes[] = {clear, cloudy, hail, mist, rain, snow, sunny, thunderstorm,
                        windy};
   //THIS IS WHERE YOU WILL NEED TO FIND A WEATHER SOURCE FOR YOUR CITY
@@ -208,36 +209,34 @@ void weather(){
    //ICONS FOR WEATHER CONDITION
   //weather image 
   //weather type
+  float tempX = width - 30;
+  float tempY = defWeatherY;
   for (int i = 0; i < weatherTypes.length; i++) {
     if(condit.toLowerCase().contains(weatherTypes[i])) {
       imageMode(CENTER);
-      image(imageTypes[i], weatherPX, weatherPY);
-      textAlign(RIGHT);
+      image(imageTypes[i], weatherPX + 15, weatherPY);
       //"CONDITIONS: "is 11 characters
-      text(condit.substring(11), weatherTX + 10, weatherTY);
+      textFont(boldFont, smSize);
+      text(condit.substring(11), tempX, weatherTY);
       break;
     }
   }
-  textAlign(RIGHT);
   //temperature stuff
   fill(255);
   textFont(boldFont, regSize);
-  float tempX = 50;
-  float tempY = defWeatherY;
   //temp: has 6 characters
   text(wdata[1].substring(6), tempX, tempY);
   tempY += 45;
-  textFont(regFont, smSize);
   for (int i = 2; i < wdata.length; ++i) {
     if (i % 2 == 0) {
-      textSize(smSize);
+      textFont(boldFont, smSize);
       text(wdata[i], tempX, tempY);
-      tempY += 20; 
+      tempY += 25; 
     }
     else { 
-      textSize(smSize - 4);
+      textFont(regFont, smSize - 4);
       text(wdata[i], tempX, tempY);
-      tempY += 15;
+      tempY += 30;
     }
   }
 }
@@ -245,28 +244,39 @@ void printEvents(int start, int end) {
   eventY = defEventY;
   for (int i = start; i < end; i++) {
     String event = events[i];
-    if (i == start && !event.contains("HEADER:")) {
-      textFont(regFont, smSize + 10);
-      text(prevHeader + " Continued...", eventX, eventY);
+    //if the events from a certain category carry over 
+    int splitIndex;
+    //saves index of date time, while comparing 
+    //if the current line is not an event
+    //DateTime is present in every event, not in any header
+    if ((splitIndex = event.indexOf("DateTime:")) == -1) {
+      textFont(boldFont, smSize + 10);
+      text(event, eventX, eventY);  
       eventY += 35;
-      end -= 2;
-    }
-    //if the current line is a header and contains no upcoming events
-    if (event.contains("HEADER:")) {
-      textFont(regFont, smSize + 10);
-      text(event.substring(event.indexOf(":") + 2), eventX, eventY);
-      prevHeader = event.substring(event.indexOf(":") + 2);
-      eventY += 35;
-      hasEvents = false;
+      prevHeader = event;
     }
     else {
-      int splitIndex = event.indexOf("EventName:");
-      textFont(lightFont, smSize);
-      text(event.substring(0, splitIndex), eventX + 30, eventY);
-      eventY += 30;
-      textFont(regFont, smSize);
-      text(event.substring(splitIndex + 11, event.length()), eventX + 50, eventY);
-      eventY += 50;
+      if (i == start) { 
+        textFont(boldFont, smSize + 10);
+        text(prevHeader, eventX, eventY);
+        eventY += 35;
+      }
+      else {
+        int split2 = event.indexOf("EventName:");
+        //category
+        textFont(lightFont, smSize);
+        text(event.substring(0, splitIndex), eventX, eventY);
+        eventY += 30;
+        //DateTime: is 9 characters
+        //date/time
+        text(event.substring(splitIndex + 9, split2), eventX + 15, eventY);
+        eventY += 30;
+        //EventName: is 10 characters
+        //event name
+        textFont(regFont, smSize);
+        text(event.substring(split2 + 10), eventX + 30, eventY);
+        eventY += 50;
+      }
     }
   }
 }
@@ -276,7 +286,7 @@ void calendar(){
    //13 is the maximum number of events that can come up without the
    //text flying off the screen
      
-   int cutOff = 10;
+   int cutOff = 8;
    //fix this later
    textAlign(LEFT);
    if (events.length == 0) { 
@@ -285,18 +295,20 @@ void calendar(){
      return;
    }
    else {
+     //last page
      if (eventPage >= ((events.length - 1) / cutOff)) {
        printEvents(eventPage * cutOff, events.length);
      }
+     //everything but last page
      else {
        printEvents(eventPage * cutOff, (eventPage * cutOff) + cutOff);
      }
-     if (millis() - prevTime >= 7000) {
+     //change page every 10 seconds
+     if (millis() - prevTime >= (10 * 1000)) {
        prevTime = millis();
        eventPage = (eventPage + 1) % (((events.length - 1) / cutOff) + 1);
      }
-     textFont(lightFont, smSize);
-     text(events.length, 500, 500);
-     text(eventPage + 1 + "/" + ceil((events.length) / (float)cutOff), 20, height - 20);
+     textFont(regFont, smSize);
+     text(eventPage + 1 + "/" + ceil((events.length) / (float)cutOff), 20, height - 50);
    }
 }

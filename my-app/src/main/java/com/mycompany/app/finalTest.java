@@ -95,47 +95,44 @@ public class finalTest {
     }
   }
   public static void getUsersCurrentlyPlayingTrack_Sync() throws IOException {
-    FileWriter fileWriter = new FileWriter("/home/pi/Desktop/my-app/now-playing.txt");
-    PrintWriter printWriter = new PrintWriter(fileWriter);
-    
     GetUsersCurrentlyPlayingTrackRequest getUsersCurrentlyPlayingTrackRequest = spotifyApi
           .getUsersCurrentlyPlayingTrack()
 //          .market(CountryCode.SE)
           .build();
+    List<String>  artists = new ArrayList<>();
+    String song, album;
     try {
       final CurrentlyPlaying currentlyPlaying = getUsersCurrentlyPlayingTrackRequest.execute();
-      if (currentlyPlaying == null) { 
-        //System.out.println("Nothing is playing"); 
-        //printWriter.println("Nothing is playing.");
-      }
-      else if (currentlyPlaying.getIs_playing()) {
-        
-        //System.out.println("Song: " + currentlyPlaying.getItem().getName());
-        //System.out.print("Artist: ");
-        
-        printWriter.println("Song: " + currentlyPlaying.getItem().getName());
-        printWriter.print("Artist: ");
+      if ((currentlyPlaying != null) && currentlyPlaying.getIs_playing()) {
+        song = currentlyPlaying.getItem().getName();
         for (int i = 0; i < currentlyPlaying.getItem().getArtists().length; ++i) {
-          if (i == currentlyPlaying.getItem().getArtists().length - 1) {
-            //System.out.println(currentlyPlaying.getItem().getArtists()[i].getName());
-            printWriter.println(currentlyPlaying.getItem().getArtists()[i].getName());
+          artists.add(currentlyPlaying.getItem().getArtists()[i].getName());
+        }
+        album = currentlyPlaying.getItem().getAlbum().getName();
+        FileWriter fileWriter = new FileWriter("/home/pi/Desktop/my-app/now-playing.txt");
+        PrintWriter printWriter = new PrintWriter(fileWriter);
+        System.out.println("Open");
+        printWriter.println("Song: " + song);
+        printWriter.print("Artist: ");
+        for (int i = 0; i < artists.size(); ++i) {
+          if (i != artists.size() -1) {
+            printWriter.print(artists.get(i) + ", ");
           }
           else {
-            //System.out.print(currentlyPlaying.getItem().getArtists()[i].getName() + ", ");
-            printWriter.print(currentlyPlaying.getItem().getArtists()[i].getName() + ", ");
+            printWriter.println(artists.get(i));
           }
         }
-        //System.out.println("Album: " + currentlyPlaying.getItem().getAlbum().getName());
-        printWriter.println("Album: " + currentlyPlaying.getItem().getAlbum().getName());
+        printWriter.println("Album: " + album);
+        System.out.println("close");
+        printWriter.close();
       }
       else {
-        //System.out.println("Nothing is playing");
-        //printWriter.println("Nothing is playing.");
+        FileWriter fileWriter = new FileWriter("/home/pi/Desktop/my-app/now-playing.txt");
+        PrintWriter printWriter = new PrintWriter(fileWriter);
+        printWriter.close();
       }
     } catch (IOException | SpotifyWebApiException e) {
-      //System.out.println("Error: " + e.getMessage());
     }
-    printWriter.close();
   }
   
   // CALENDAR METHODS
@@ -173,34 +170,32 @@ public class finalTest {
           String condition = client.currentWeatherAtCity(cityId).getWeatherConditions()
               .get(0)
 							.getDescription();
-          int temp = (int)client.currentWeatherAtCity(cityId).getTemp();
-          int tempMax = (int)client.currentWeatherAtCity(cityId).getTempMax();
-          int tempMin = (int)client.currentWeatherAtCity(cityId).getTempMin();
-          int humidity = (int)client.currentWeatherAtCity(cityId).getHumidity();
-          int windSpd = 0;
-          int rain = 0;
-          int snow = 0;
+          float temp = client.currentWeatherAtCity(cityId).getTemp();
+          float tempMax = client.currentWeatherAtCity(cityId).getTempMax();
+          float tempMin = client.currentWeatherAtCity(cityId).getTempMin();
+          float humidity = client.currentWeatherAtCity(cityId).getHumidity();
+          float windSpd = 0;
+          float rain = 0;
+          float snow = 0;
           if (client.currentWeatherAtCity(cityId).hasWind()) {
-            windSpd = (int)client.currentWeatherAtCity(cityId).getWindSpeed();
+            windSpd = client.currentWeatherAtCity(cityId).getWindSpeed();
           }
           if (client.currentWeatherAtCity(cityId).hasRain()) {
-            rain = (int)client.currentWeatherAtCity(cityId).getRain();
+            rain = client.currentWeatherAtCity(cityId).getRain();
           }  
           if (client.currentWeatherAtCity(cityId).hasSnow()) {
-            snow = (int)client.currentWeatherAtCity(cityId).getSnow(); 
+            snow = client.currentWeatherAtCity(cityId).getSnow(); 
           }
           FileWriter fileWriter = new FileWriter("/home/pi/Desktop/my-app/weather.txt");
-          System.out.println("open");
           PrintWriter printWriter = new PrintWriter(fileWriter);
           printWriter.println("Condition: " + WordUtils.capitalizeFully(condition));
-          printWriter.println("Temp: " + temp + (char)176 + "F");
-          printWriter.println("Hi/Lo\n" + tempMax	+ (char)176 + "/" + tempMin + (char)176);
-          printWriter.println("Humidity\n" + humidity + "%");
-          printWriter.println("Wind Speed\n" + windSpd + "mph");
-          printWriter.println("Rain\n" + rain + "mm");
-          printWriter.println("Snow\n" + snow + "mm");
+          printWriter.println("Temp: " + (int)temp + (char)176 + "F");
+          printWriter.println("Hi/Lo\n" + (int)tempMax	+ (char)176 + "/" + (int)tempMin + (char)176);
+          printWriter.println("Humidity\n" + (int)humidity + "%");
+          printWriter.println("Wind Speed\n" + (int)windSpd + "mph");
+          printWriter.println("Rain\n" + (int)rain + "mm");
+          printWriter.println("Snow\n" + (int)snow + "mm");
           printWriter.close();
-          System.out.println("close");
           Thread.sleep(20000);
         }
       } catch (InterruptedException e) {
@@ -235,6 +230,9 @@ public class finalTest {
       name = name_in;
       url = url_in;
     }  
+    public eventObj(String name_in) {
+      name = name_in;
+    }
     public String getName() {
       return name;
     }
@@ -246,6 +244,9 @@ public class finalTest {
     }
     public void addItems(List<Event> items_in) {
       items.addAll(items_in);
+    }
+    public void addItems(Event obj) {
+      items.add(obj);
     }
     public void clearItems() {
       items.removeAll(items);
@@ -271,7 +272,7 @@ public class finalTest {
       Thread t2 = new Thread(new weatherLoop());
       t2.start();
       try {
-        SimpleDateFormat timedEvent = new SimpleDateFormat("EEEE, MM/dd 'at' hh:mm a");
+        SimpleDateFormat timedEvent = new SimpleDateFormat("EEEE, MM/dd 'at' hh:mma");
         SimpleDateFormat allDay = new SimpleDateFormat("EEEE, MM/dd");
         while (t2.isAlive()) {
           Date weekAway = new Date(System.currentTimeMillis());
@@ -289,9 +290,10 @@ public class finalTest {
           }
           FileWriter fileWriter = new FileWriter("/home/pi/Desktop/my-app/events.txt");
           PrintWriter printWriter = new PrintWriter(fileWriter);
+          List<eventObj> datedItems = Arrays.asList(new eventObj("TODAY"), 
+                    new eventObj("TOMORROW"), new eventObj("UPCOMING"));
           for (eventObj eObj : eventList) {
             if (eObj.hasItems()) {
-                printWriter.println("HEADER: " + eObj.getName());
                 for (Event event : eObj.getItems()) { 
                   DateTime start = event.getStart().getDateTime();
                   DateTime end = event.getEnd().getDateTime();
@@ -305,9 +307,49 @@ public class finalTest {
                       temp = new Date(event.getStart().getDateTime().getValue());
                       time = timedEvent.format(temp);
                   }
-                  printWriter.printf("%s EventName: %s \n", 
-                                     time, event.getSummary());
+                  DateTime td = new DateTime(System.currentTimeMillis());
+                  DateTime tmrw = new DateTime(System.currentTimeMillis() + 86400000);
+                  if ((start.getValue() / 86400000) - 
+                      (td.getValue() / 86400000) < 1) {
+                    datedItems.get(0).addItems(event);
+                    //printWriter.print("TD:");
+                  }
+                  else if ((start.getValue() / 86400000) - 
+                      (tmrw.getValue() / 86400000) < 1) {
+                    datedItems.get(1).addItems(event);
+                    //printWriter.print("TM:");
+                  }
+                  else { 
+                    datedItems.get(2).addItems(event);
+                    //printWriter.print("UP:");
+                  }
+                  //printWriter.printf("%s EventName: %s \n", 
+                    //                 time, event.getSummary());
                 }
+            }
+          }
+          for (int i = 0; i < datedItems.size(); ++i) {
+            List<Event> tempList = datedItems.get(i).getItems();
+            printWriter.println(datedItems.get(i).getName());
+            for (Event event : tempList)  {
+              DateTime start = event.getStart().getDateTime();
+              DateTime end = event.getEnd().getDateTime();
+              if (start == null) {
+                  start = event.getStart().getDate();
+                      //the all day events are for some reason off by a day
+                  temp = new Date(event.getStart().getDate().getValue() + 86400000);
+                  time = allDay.format(temp);
+              }
+              else {
+                  temp = new Date(event.getStart().getDateTime().getValue());
+                  time = timedEvent.format(temp);
+              }
+              String name = event.getOrganizer().getDisplayName();
+              if (name == null) { 
+                name = "General";
+              }
+              printWriter.printf("%sDateTime:%sEventName:%s \n", 
+                                     name, time, event.getSummary());
             }
           }
           printWriter.close();

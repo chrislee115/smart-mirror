@@ -1,14 +1,16 @@
-HEADER: General
-Sunday, 09/01 at 12:00 PM EventName: work on vid 
-HEADER: KTP
-Friday, 08/30 at 03:00 PM EventName: MARKETING MEMEBERSHIP WOOHOO 
-Saturday, 08/31 EventName: GAMEDAY 
-Sunday, 09/01 EventName: bus signs should be up! keep eyes peeled, take pics if u see them! :) 
-Monday, 09/02 at 11:00 AM EventName: NORTHFEST 
-Tuesday, 09/03 EventName: school starts 
-Tuesday, 09/03 at 08:30 PM EventName: Chapter 
-Wednesday, 09/04 at 06:30 PM EventName: MARKETING MEETING (TENTATIVE) 
-Thursday, 09/05 at 12:00 PM EventName: UMSI Resource Fair 
-Thursday, 09/05 at 05:00 PM EventName: tentative membership meeting 
-HEADER: Holidays
-Monday, 09/02 EventName: Labor Day 
+TODAY
+Kappa Theta PiDateTime:Sunday, 09/01EventName:bus signs should be up! keep eyes peeled, take pics if u see them! :) 
+Holidays in United StatesDateTime:Monday, 09/02EventName:Labor Day 
+TOMORROW
+Kappa Theta PiDateTime:Tuesday, 09/03EventName:school starts 
+UPCOMING
+GeneralDateTime:Friday, 09/06 at 02:00PMEventName:festifall shift 
+GeneralDateTime:Sunday, 09/08 at 12:00PMEventName:work on vid 
+Kappa Theta PiDateTime:Tuesday, 09/03 at 08:30PMEventName:Chapter 
+Kappa Theta PiDateTime:Wednesday, 09/04 at 06:30PMEventName:MARKETING MEETING (TENTATIVE) 
+Kappa Theta PiDateTime:Thursday, 09/05 at 12:00PMEventName:UMSI Resource Fair 
+Kappa Theta PiDateTime:Thursday, 09/05 at 05:00PMEventName:tentative membership meeting 
+Kappa Theta PiDateTime:Friday, 09/06 at 02:00PMEventName:F E S T I F A L L 
+Kappa Theta PiDateTime:Saturday, 09/07EventName:GAMEDAY 
+Kappa Theta PiDateTime:Saturday, 09/07 at 05:30PMEventName:KTP Pool Party @ Yard (Engagement) 
+Kappa Theta PiDateTime:Sunday, 09/08 at 04:00PMEventName:EBoard Office Hours 

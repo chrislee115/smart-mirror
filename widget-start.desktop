@@ -1,0 +1,7 @@
+#!/usr/bin/env
+[Desktop Entry]
+Name=widget-start
+Comment=updates all the widgets texts file
+Exec=/home/pi/Desktop/my-app/widgets
+Terminal=false
+Type=Application

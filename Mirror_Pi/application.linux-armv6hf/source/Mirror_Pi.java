@@ -62,13 +62,16 @@ String wdata[];
 String condit; 
 PImage clear, cloudy, hail, mist, rain, snow, sunny, thunderstorm, windy;
 //TODO: find more images
-String weatherTypes[] = {"clear", "cloudy", "hail", "mist", "rain", "snow", "sunny",
-                        "thunderstorm", "windy"};
+String weatherTypes[] = {"thunder", "wind", "rain", "cloud", "hail", 
+                          "mist",  "snow", "sun", "clear"};
 String weatherText;
 float weatherPX = mWidth - 100;
 float weatherPY = 390;
 float weatherTX = mWidth - 65;
 float weatherTY = 480;
+
+//NOW PLAYING SPECS
+String songData[];
 
 //CALENDAR SPECS
 String events[];
@@ -80,10 +83,11 @@ float eventX = 30;
 float defEventY = 250;
 float eventY;
 boolean isLYear = (year() % 4 == 0);
-boolean hasEvents;
 int eventPage = 0;
-int updateTime = 0;
+int updateCal = 0;
+int updateSpot = 0;
 int prevTime = 0;
+PImage bg;
 static public void main(String args[]) {
   PApplet.main("Mirror_Pi");
 }
@@ -94,32 +98,28 @@ public void setup(){
   regFont = createFont("Open Sans Regular", 72);
   boldFont = createFont("Open Sans SemiBold", 72);
   textFont(lightFont, regSize);
-  launch("/home/pi/Desktop/calendar-startup.desktop");
-    
-  clear = loadImage("/home/pi/Desktop/Mirror_Pi/Sunny.jpg");
-  cloudy = loadImage("/home/pi/Desktop/Mirror_Pi/Cloudy.jpg");
-  hail = loadImage("/home/pi/Desktop/Mirror_Pi/Hail.jpg");
-  mist = loadImage("/home/pi/Desktop/Mirror_Pi/Mist.jpg");
-  rain = loadImage("/home/pi/Desktop/Mirror_Pi/Rain.jpg"); 
-  snow = loadImage("/home/pi/Desktop/Mirror_Pi/Snow.jpg");
-  sunny = loadImage("/home/pi/Desktop/Mirror_Pi/Sunny.jpg");
-  thunderstorm = loadImage("/home/pi/Desktop/Mirror_Pi/Thunderstorm.jpg");
-  windy = loadImage("/home/pi/Desktop/Mirror_Pi/Windy.jpg");
+  launch("/home/pi/Desktop/widget-start.desktop");
+  
+  clear = loadImage("/home/pi/Desktop/Mirror_Pi/Sunny.png");
+  cloudy = loadImage("/home/pi/Desktop/Mirror_Pi/Cloudy.png");
+  hail = loadImage("/home/pi/Desktop/Mirror_Pi/Hail.png");
+  mist = loadImage("/home/pi/Desktop/Mirror_Pi/Mist.png");
+  rain = loadImage("/home/pi/Desktop/Mirror_Pi/Rain.png"); 
+  snow = loadImage("/home/pi/Desktop/Mirror_Pi/Snow.png");
+  sunny = loadImage("/home/pi/Desktop/Mirror_Pi/Sunny.png");
+  thunderstorm = loadImage("/home/pi/Desktop/Mirror_Pi/Thunderstorm.png");
+  windy = loadImage("/home/pi/Desktop/Mirror_Pi/Windy.png");
+  
+  bg = loadImage("/home/pi/Desktop/northern-lights.jpeg");
 }
 
 public void draw(){
-  if (millis() - updateTime >= 15000) {
-    launch("/home/pi/Desktop/calendar-startup.desktop");
-    updateTime = millis();
-  }
-  background(0);
-  fill(0);
-  stroke(255);
-  rect(10,10,width-20,height-20);
+  background(bg);
   int texcol = 255;
   int fillcol = 0;
   weather();
   calendar();
+  nowPlaying();
   fill(fillcol);
   noStroke();
   rectMode(CORNER);
@@ -129,6 +129,7 @@ public void draw(){
     
     //greeting + name
   textSize(regSize);
+  textAlign(LEFT);
   if (hour() < 6 || hour() > 20) {
     text("Good Evening,", greetingX, greetingY);
   } else if (hour() < 12) {
@@ -168,15 +169,27 @@ public void draw(){
      //DAY
   text(getDOW(year(), month(), day()) + ", " + months[month() - 1]+ " " + day(), dateX, dateY);
   //////////////////////////////////////////////////
-  textAlign(LEFT);
-  stroke(255);
   //EVENTS
 }  
+//fail safe, click  top left to close program
 public void mousePressed() {
   if (mouseX >= 0 && mouseX < 300) {
     if (mouseY >= 0 && mouseY < 300) {
       exit();
     }
+  }
+}
+public void nowPlaying() {
+  songData = loadStrings("/home/pi/Desktop/my-app/now-playing.txt");
+  //0 is name, 1 is artist, 2 is album
+  textAlign(CENTER);
+  if (songData.length > 0) {
+    textSize(smSize + 5);
+    text("Now Playing", width / 2, height - 130);
+    textSize(smSize);
+    text(songData[0], width / 2, height - 100);
+    text(songData[1], width / 2, height - 70);
+    text(songData[2], width / 2, height - 40);
   }
 }
 public String getDOW(int y, int m, int d) {
@@ -196,128 +209,125 @@ public int standardizeHour(int hour_in){
   }
   return hour_in;
 }
-public int findSource(String data[], String keyword){
-  //for weather, the source string is the second string containing the keyword
-  int weatherIndex = -1;
-  boolean foundFirst = false;
-  for (int i = 200; i < 230; i++) {
-    if (data[i].contains(keyword)) {
-      if (!foundFirst) {
-        foundFirst = true;
-      }
-      else {
-        return i;
-      }
-    }
-  }
-  return weatherIndex;
-}
-public String getText(String str) {
-  //reset weatherText string
-  weatherText = "";
-  int index = str.lastIndexOf("text:");
-  //to skip "text:""
-  index += 6;
-  while (str.charAt(index) != '"') {
-    weatherText += str.charAt(index);
-    index++;
-  }
-  return weatherText;
-}
+int defWeatherY = 550;
 public void weather(){
+  textAlign(RIGHT);
   PImage imageTypes[] = {clear, cloudy, hail, mist, rain, snow, sunny, thunderstorm,
                        windy};
   //THIS IS WHERE YOU WILL NEED TO FIND A WEATHER SOURCE FOR YOUR CITY
-  wdata = loadStrings("https://www.accuweather.com/en/us/troy-mi/48098/weather-forecast/338798");
-  condit = wdata[findSource(wdata, "acm_RecentLocationsCarousel")];
+  wdata = loadStrings("/home/pi/Desktop/my-app/weather.txt");
+  //weather listed in this order: conditions (0), temp (1), hi/lo (2), humidity (3)
+  //windspeed(4), rain (5), snow (6)
+  if (wdata.length == 0) { 
+    return;
+  }
+  condit = wdata[0];
   fill(255);
   textSize(smSize);
    //ICONS FOR WEATHER CONDITION
- 
-  
   //weather image 
   //weather type
+  float tempX = width - 30;
+  float tempY = defWeatherY;
   for (int i = 0; i < weatherTypes.length; i++) {
     if(condit.toLowerCase().contains(weatherTypes[i])) {
       imageMode(CENTER);
-      image(imageTypes[i], weatherPX, weatherPY);
-      textAlign(RIGHT);
-      text(getText(condit), weatherTX, weatherTY);
+      image(imageTypes[i], weatherPX + 15, weatherPY);
+      //"CONDITIONS: "is 11 characters
+      textFont(boldFont, smSize);
+      text(condit.substring(11), tempX, weatherTY);
       break;
     }
   }
-  textAlign(LEFT);
   //temperature stuff
-  int tempIndex = condit.indexOf("temp:");
-  String temperature = ""; 
- 
-  while (condit.charAt(tempIndex) != ',') {
-    if ('0' <= condit.charAt(tempIndex) && condit.charAt(tempIndex) <= '9') {
-      temperature += condit.charAt(tempIndex);
-    }
-    tempIndex++;
-  }
-  
   fill(255);
   textFont(boldFont, regSize);
-  float tempX = width - 260;
-  float tempY = 420;
-  text(temperature + "°", tempX, tempY);
+  //temp: has 6 characters
+  text(wdata[1].substring(6), tempX, tempY);
+  tempY += 45;
+  for (int i = 2; i < wdata.length; ++i) {
+    if (i % 2 == 0) {
+      textFont(boldFont, smSize);
+      text(wdata[i], tempX, tempY);
+      tempY += 25; 
+    }
+    else { 
+      textFont(regFont, smSize - 4);
+      text(wdata[i], tempX, tempY);
+      tempY += 30;
+    }
+  }
 }
 public void printEvents(int start, int end) {
   eventY = defEventY;
   for (int i = start; i < end; i++) {
     String event = events[i];
-    if (i == start && !event.contains("HEADER:")) {
-      textFont(regFont, smSize + 10);
-      text(prevHeader + "Cont.", eventX, eventY);
+    //if the events from a certain category carry over 
+    int splitIndex;
+    //saves index of date time, while comparing 
+    //if the current line is not an event
+    //DateTime is present in every event, not in any header
+    if ((splitIndex = event.indexOf("DateTime:")) == -1) {
+      textFont(boldFont, smSize + 10);
+      text(event, eventX, eventY);  
       eventY += 35;
-      end -= 2;
-    }
-    //if the current line is a header and contains no upcoming events
-    if (event.contains("HEADER:")) {
-      if(!event.contains("No Upcoming Events")) {
-         textFont(regFont, smSize + 10);
-         text(event.substring(event.indexOf(":") + 2), eventX, eventY);
-         prevHeader = event.substring(event.indexOf(":") + 2);
-         eventY += 35;
-         hasEvents = false;
-      }
+      prevHeader = event;
     }
     else {
-      int splitIndex = event.indexOf("EventName");
-      textFont(lightFont, smSize);
-      text(event.substring(0, splitIndex), eventX + 30, eventY);
-      eventY += 30;
-      textFont(regFont, smSize);
-      text(event.substring(splitIndex + 11, event.length()), eventX + 50, eventY);
-      eventY += 50;
+      if (i == start) { 
+        textFont(boldFont, smSize + 10);
+        text(prevHeader, eventX, eventY);
+        eventY += 35;
+      }
+      else {
+        int split2 = event.indexOf("EventName:");
+        //category
+        textFont(lightFont, smSize);
+        text(event.substring(0, splitIndex), eventX, eventY);
+        eventY += 30;
+        //DateTime: is 9 characters
+        //date/time
+        text(event.substring(splitIndex + 9, split2), eventX + 15, eventY);
+        eventY += 30;
+        //EventName: is 10 characters
+        //event name
+        textFont(regFont, smSize);
+        text(event.substring(split2 + 10), eventX + 30, eventY);
+        eventY += 50;
+      }
     }
   }
 }
 public void calendar(){
    //google calendar api implementation, pull from events.txt  
-   events = loadStrings("/home/pi/Desktop/calendar/events.txt");
+   events = loadStrings("/home/pi/Desktop/my-app/events.txt");
    //13 is the maximum number of events that can come up without the
    //text flying off the screen
-   int cutOff = 12;
+     
+   int cutOff = 8;
    //fix this later
-   if (events.length <= cutOff) {
-     printEvents(0, events.length);
+   textAlign(LEFT);
+   if (events.length == 0) { 
+     textFont(regFont, smSize + 5);
+     text("No upcoming events.", eventX, eventY);
+     return;
    }
    else {
+     //last page
      if (eventPage >= ((events.length - 1) / cutOff)) {
        printEvents(eventPage * cutOff, events.length);
      }
+     //everything but last page
      else {
        printEvents(eventPage * cutOff, (eventPage * cutOff) + cutOff);
      }
-     if (millis() - prevTime >= 7000) {
+     //change page every 10 seconds
+     if (millis() - prevTime >= (10 * 1000)) {
        prevTime = millis();
        eventPage = (eventPage + 1) % (((events.length - 1) / cutOff) + 1);
      }
-     textFont(lightFont, smSize);
-     text(eventPage + 1 + "/" + (events.length) / cutOff, 20, height - 20);
+     textFont(regFont, smSize);
+     text(eventPage + 1 + "/" + ceil((events.length) / (float)cutOff), 20, height - 50);
    }
 }
   public void settings() {  fullScreen(); }
